@@ -1,9 +1,13 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useContext } from "react";
 import '../donors/donors.css';
 import DeleteConfirm from '../donors/DeleteConfirm';
 import { campaigns as initial } from "../../../data/campaigns";
+import AuthContext from "../../../services/authContext/AuthContext";
+import { ROLES } from "../../../services/authContext/auth.utils";
 
 const CampaignsTable = () => {
+  const { isAuthenticated, role } = useContext(AuthContext);
+  const isAdmin = isAuthenticated && role === ROLES.ADMIN;
   const [campaigns, setCampaigns] = useState(initial);
   const [editing, setEditing] = useState(null);
   const [showForm, setShowForm] = useState(false);
@@ -103,9 +107,11 @@ const CampaignsTable = () => {
                 <button className="btn small" onClick={() => handleEdit(c)}>
                   Edit
                 </button>
-                <button className="btn small danger" onClick={() => handleDelete(c.id)}>
-                  Delete
-                </button>
+                {isAdmin && (
+                  <button className="btn small danger" onClick={() => handleDelete(c.id)}>
+                    Delete
+                  </button>
+                )}
               </td>
             </tr>
           ))}

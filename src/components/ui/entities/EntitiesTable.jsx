@@ -1,10 +1,14 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useContext } from 'react';
 import '../donors/donors.css';
 import EntityForm from './EntityForm';
 import DeleteConfirm from '../donors/DeleteConfirm';
 import { entities as initial } from '../../../data/entities';
+import AuthContext from '../../../services/authContext/AuthContext';
+import { ROLES } from '../../../services/authContext/auth.utils';
 
 const EntitiesTable = () => {
+  const { isAuthenticated, role } = useContext(AuthContext);
+  const isAdmin = isAuthenticated && role === ROLES.ADMIN;
   const [items, setItems] = useState(initial);
   const [editing, setEditing] = useState(null);
   const [showForm, setShowForm] = useState(false);
@@ -110,9 +114,11 @@ const EntitiesTable = () => {
                 <button className="btn small" onClick={() => handleEdit(e)}>
                   Edit
                 </button>
-                <button className="btn small danger" onClick={() => handleDelete(e.id)}>
-                  Delete
-                </button>
+                {isAdmin && (
+                  <button className="btn small danger" onClick={() => handleDelete(e.id)}>
+                    Delete
+                  </button>
+                )}
               </td>
             </tr>
           ))}

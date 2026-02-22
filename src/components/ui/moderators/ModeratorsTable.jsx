@@ -1,8 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useContext } from 'react';
 import '../donors/donors.css';
 import ModeratorForm from './ModeratorForm';
 import PromoteConfirm from './PromoteConfirm';
 import DeleteConfirm from '../donors/DeleteConfirm';
+import AuthContext from '../../../services/authContext/AuthContext';
+import { ROLES } from '../../../services/authContext/auth.utils';
 import {
   getModerators,
   createModerator,
@@ -11,6 +13,8 @@ import {
 } from './moderators.services';
 
 const ModeratorsTable = () => {
+  const { isAuthenticated, role } = useContext(AuthContext);
+  const isAdmin = isAuthenticated && role === ROLES.ADMIN;
   const [moderators, setModerators] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -119,9 +123,11 @@ const ModeratorsTable = () => {
                 <button className="btn small" onClick={() => handlePromote(m)}>
                   Promote
                 </button>
-                <button className="btn small danger" onClick={() => handleDelete(m)}>
-                  Delete
-                </button>
+                {isAdmin && (
+                  <button className="btn small danger" onClick={() => handleDelete(m)}>
+                    Delete
+                  </button>
+                )}
               </td>
             </tr>
           ))}

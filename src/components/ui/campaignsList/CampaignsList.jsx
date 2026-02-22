@@ -14,9 +14,9 @@ const CampaignsList = () => {
     setSearch(searchValue);
   };
 
-  const isAdmin = isAuthenticated && role === ROLES.ADMIN;
+  const isCrudUser = isAuthenticated && role >= ROLES.MODERATOR;
 
-  if (isAdmin) {
+  if (isCrudUser) {
     return (
       <div className="mt-2 mx-4 campaigns-list-wrapper">
         <h1>Campaigns</h1>

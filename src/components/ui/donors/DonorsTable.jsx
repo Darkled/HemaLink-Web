@@ -1,10 +1,14 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useContext } from 'react';
 import './donors.css';
 import DonorForm from './DonorForm';
 import DeleteConfirm from './DeleteConfirm';
 import { donors as initial } from '../../../data/donors';
+import AuthContext from '../../../services/authContext/AuthContext';
+import { ROLES } from '../../../services/authContext/auth.utils';
 
 const DonorsTable = () => {
+  const { isAuthenticated, role } = useContext(AuthContext);
+  const isAdmin = isAuthenticated && role === ROLES.ADMIN;
   const [donors, setDonors] = useState(initial);
   const [editing, setEditing] = useState(null);
   const [showForm, setShowForm] = useState(false);
@@ -108,9 +112,11 @@ const DonorsTable = () => {
                 <button className="btn small" onClick={() => handleEdit(d)}>
                   Edit
                 </button>
-                <button className="btn small danger" onClick={() => handleDelete(d.id)}>
-                  Delete
-                </button>
+                {isAdmin && (
+                  <button className="btn small danger" onClick={() => handleDelete(d.id)}>
+                    Delete
+                  </button>
+                )}
               </td>
             </tr>
           ))}
