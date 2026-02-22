@@ -4,16 +4,19 @@ import CampaignCard from "./campaignCard/CampaignCard.jsx";
 import CampaignSearch from "./CampaignSearch.jsx";
 import CampaignsTable from "./CampaignsTable.jsx";
 import AuthContext from "../../../services/authContext/AuthContext";
+import { ROLES } from "../../../services/authContext/auth.utils";
 
 const CampaignsList = () => {
   const [search, setSearch] = useState("");
-  const { user } = useContext(AuthContext);
+  const { isAuthenticated, role } = useContext(AuthContext);
 
   const handleSearchChange = (searchValue) => {
     setSearch(searchValue);
   };
 
-  if (user && user.role === "Admin") {
+  const isAdmin = isAuthenticated && role === ROLES.ADMIN;
+
+  if (isAdmin) {
     return (
       <div className="mt-2 mx-4 campaigns-list-wrapper">
         <h1>Campaigns</h1>

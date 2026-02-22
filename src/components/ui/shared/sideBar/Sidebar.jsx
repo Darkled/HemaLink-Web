@@ -3,6 +3,7 @@ import { useContext } from "react";
 import ThemeContext from "../../../../services/themeContext/ThemeContext";
 import AuthContext from "../../../../services/authContext/AuthContext";
 import { THEME } from "../../../../services/themeContext/ThemeContext.const";
+import { ROLES } from "../../../../services/authContext/auth.utils";
 import logo from "../../../../assets/hemalink_isotype.svg";
 
 import {
@@ -30,7 +31,7 @@ import {
 
 const Sidebar = () => {
   const { theme, onChangeTheme } = useContext(ThemeContext);
-  const { isAuthenticated, setShowAuthModal, logout } = useContext(AuthContext);
+  const { isAuthenticated, role, setShowAuthModal, logout } = useContext(AuthContext);
   const handleToggleTheme = () => {
     onChangeTheme();
   };
@@ -62,7 +63,7 @@ const Sidebar = () => {
             Donations
           </NavLink>
         </CNavItem>
-        {isAuthenticated && (
+        {isAuthenticated && role >= ROLES.MODERATOR && (
           <>
             <CNavItem>
               <NavLink to="/donors" className="nav-link">
@@ -82,13 +83,15 @@ const Sidebar = () => {
                 Appointments
               </NavLink>
             </CNavItem>
-            <CNavItem>
-              <NavLink to="/settings" className="nav-link">
-                <CIcon icon={cilSettings} className="nav-icon" />
-                Settings
-              </NavLink>
-            </CNavItem>
           </>
+        )}
+        {isAuthenticated && role >= ROLES.ADMIN && (
+          <CNavItem>
+            <NavLink to="/settings" className="nav-link">
+              <CIcon icon={cilSettings} className="nav-icon" />
+              Settings
+            </NavLink>
+          </CNavItem>
         )}
       </CSidebarNav>
       <CSidebarFooter className="px-3 py-3">

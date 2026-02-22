@@ -1,6 +1,6 @@
 import { useState, useContext } from "react";
 import { Form, Button, Alert } from "react-bootstrap";
-import AuthContext from "../../../services/authContext/AuthContext";
+import AuthContext from "../../../services/authContext/AuthContext.js";
 
 const Register = () => {
   const [name, setName] = useState("");

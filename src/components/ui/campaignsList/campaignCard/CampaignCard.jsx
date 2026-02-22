@@ -38,7 +38,6 @@ const CampaignCard = ({
   const handleSubmit = (ev) => {
     ev.preventDefault();
     if (!validate()) return;
-    console.log("Donation signup", { campaignId: id, fullName, email });
     alert("Thanks! You've been signed up to donate. (Demo)");
     closeModal();
   };
@@ -67,6 +66,17 @@ const CampaignCard = ({
       "AB-": "warning",
     };
     return colors[bloodType] || "dark";
+  };
+
+  const getBaiduMapUrl = (lng, lat, title, content) => {
+    const params = new URLSearchParams({
+      lng,
+      lat,
+      title,
+      content,
+      output: "html",
+    });
+    return `https://api.map.baidu.com/lbsapi/getpoint/index.html?${params.toString()}`;
   };
 
   return (
@@ -98,7 +108,6 @@ const CampaignCard = ({
             {units}
           </div>
         </div>
-        {/* Only show donation button if not admin */}
         {!(window.localStorage.getItem("hemalink-auth") && JSON.parse(window.localStorage.getItem("hemalink-auth")).role === "Admin") && (
           <div className="d-flex justify-content-end mt-auto">
             <Button
@@ -121,12 +130,12 @@ const CampaignCard = ({
           <div className="mb-3">
             <strong>Location:</strong> {location}
           </div>
-          <div
-            style={{ width: "100%", height: 200, background: "#eee" }}
-            className="mb-3 d-flex align-items-center justify-content-center"
-          >
-            <span>Google Maps placeholder for: {location}</span>
-          </div>
+          <iframe
+            title="baidu-map"
+            src={getBaiduMapUrl(116.404, 39.915, entityName, location)}
+            style={{ width: "100%", height: 200, border: 0 }}
+            allowFullScreen
+          />
 
           <Form onSubmit={handleSubmit} noValidate>
             <Form.Group className="mb-2" controlId="fullName">

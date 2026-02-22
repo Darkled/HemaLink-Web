@@ -1,18 +1,22 @@
 import { useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import { Form, Button, Alert } from "react-bootstrap";
-import AuthContext from "../../../services/authContext/AuthContext";
+import AuthContext from "../../../services/authContext/AuthContext.js";
 
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const { login, setModalView } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError(null);
     const res = await login(username, password);
-    if (!res.ok) {
+    if (res.ok) {
+      navigate("/");
+    } else {
       setError(res.message || "Invalid credentials");
     }
   };

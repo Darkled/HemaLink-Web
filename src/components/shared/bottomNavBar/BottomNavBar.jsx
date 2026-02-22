@@ -3,6 +3,7 @@ import { useContext } from "react";
 import ThemeContext from "../../../services/themeContext/ThemeContext";
 import AuthContext from "../../../services/authContext/AuthContext";
 import { THEME } from "../../../services/themeContext/ThemeContext.const";
+import { ROLES } from "../../../services/authContext/auth.utils";
 
 import CIcon from "@coreui/icons-react";
 import {
@@ -21,7 +22,7 @@ import "./BottomNavBar.css";
 
 const BottomNavBar = () => {
   const { theme, onChangeTheme } = useContext(ThemeContext);
-  const { isAuthenticated, setShowAuthModal, logout } = useContext(AuthContext);
+  const { isAuthenticated, role, setShowAuthModal, logout } = useContext(AuthContext);
 
   const handleToggleTheme = () => {
     onChangeTheme();
@@ -39,7 +40,7 @@ const BottomNavBar = () => {
           <CIcon icon={cilDrop} className="nav-icon" />
           <span className="nav-label">Donations</span>
         </NavLink>
-        {isAuthenticated && (
+        {isAuthenticated && role >= ROLES.MODERATOR && (
           <>
             <NavLink
               to="/donors"
@@ -65,15 +66,17 @@ const BottomNavBar = () => {
               <CIcon icon={cilCalendar} className="nav-icon" />
               <span className="nav-label">Appointments</span>
             </NavLink>
-            <NavLink
-              to="/settings"
-              className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
-              title="Settings"
-            >
-              <CIcon icon={cilSettings} className="nav-icon" />
-              <span className="nav-label">Settings</span>
-            </NavLink>
           </>
+        )}
+        {isAuthenticated && role >= ROLES.ADMIN && (
+          <NavLink
+            to="/settings"
+            className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+            title="Settings"
+          >
+            <CIcon icon={cilSettings} className="nav-icon" />
+            <span className="nav-label">Settings</span>
+          </NavLink>
         )}
       </div>
 

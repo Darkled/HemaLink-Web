@@ -5,7 +5,12 @@ import LoginForm from "./login/LoginForm";
 import RegisterForm from "./register/RegisterForm";
 
 const AuthModal = () => {
-	const { showAuthModal, setShowAuthModal, modalView } = useContext(AuthContext);
+	const { showAuthModal, setShowAuthModal, modalView, isAuthenticated } = useContext(AuthContext);
+
+	if (isAuthenticated && showAuthModal) {
+		setShowAuthModal(false);
+		return null;
+	}
 
 	return (
 		<Modal show={showAuthModal} onHide={() => setShowAuthModal(false)} centered>
