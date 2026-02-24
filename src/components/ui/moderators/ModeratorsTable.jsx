@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useContext } from 'react';
+import { useState, useEffect, useCallback, useContext, useMemo } from 'react';
 import '../donors/donors.css';
 import ModeratorForm from './ModeratorForm';
 import PromoteConfirm from './PromoteConfirm';
@@ -7,6 +7,7 @@ import AuthContext from '../../../services/authContext/AuthContext';
 import { ROLES } from '../../../services/authContext/auth.utils';
 import {
   getModerators,
+  getAdmins,
   createModerator,
   deleteModerator,
   promoteModerator,
@@ -18,6 +19,35 @@ const ModeratorsTable = () => {
   const [moderators, setModerators] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const [sortKey, setSortKey] = useState('type');
+  const [sortDir, setSortDir] = useState('asc');
+
+  const toggleSort = (key) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortKey(key);
+      setSortDir('asc');
+    }
+  };
+
+  const sortIndicator = (key) => {
+    if (sortKey !== key) return ' ↕';
+    return sortDir === 'asc' ? ' ↑' : ' ↓';
+  };
+
+  const sortedModerators = useMemo(() => {
+    const list = [...moderators];
+    list.sort((a, b) => {
+      const valA = (a[sortKey] || '').toLowerCase();
+      const valB = (b[sortKey] || '').toLowerCase();
+      if (valA < valB) return sortDir === 'asc' ? -1 : 1;
+      if (valA > valB) return sortDir === 'asc' ? 1 : -1;
+      return 0;
+    });
+    return list;
+  }, [moderators, sortKey, sortDir]);
 
   const [showForm, setShowForm] = useState(false);
 
@@ -31,8 +61,13 @@ const ModeratorsTable = () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await getModerators();
-      setModerators(Array.isArray(data) ? data : []);
+      const [modsData, adminsData] = await Promise.all([
+        getModerators(),
+        getAdmins(),
+      ]);
+      const mods = (Array.isArray(modsData) ? modsData : []).map((m) => ({ ...m, type: 'Moderator' }));
+      const admins = (Array.isArray(adminsData) ? adminsData : []).map((a) => ({ ...a, type: 'Admin' }));
+      setModerators([...admins, ...mods]);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -90,7 +125,7 @@ const ModeratorsTable = () => {
     }
   };
 
-  if (loading) return <p className="mx-4">Loading moderators…</p>;
+  if (loading) return <p className="mx-4">Loading moderators and admins…</p>;
   if (error) return <p className="mx-4 text-danger">Error: {error}</p>;
 
   return (
@@ -108,22 +143,30 @@ const ModeratorsTable = () => {
         <thead>
           <tr>
             <th>ID</th>
-            <th>Name</th>
+            <th style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => toggleSort('name')}>
+              Name{sortIndicator('name')}
+            </th>
             <th>Email</th>
+            <th style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => toggleSort('type')}>
+              Type{sortIndicator('type')}
+            </th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {moderators.map((m) => (
-            <tr key={m.id}>
+          {sortedModerators.map((m) => (
+            <tr key={`${m.type}-${m.id}`} style={{ height: '49px' }}>
               <td data-label="ID">{m.id}</td>
               <td data-label="Name">{m.name}</td>
               <td data-label="Email">{m.email}</td>
+              <td data-label="Type">{m.type}</td>
               <td>
-                <button className="btn small" onClick={() => handlePromote(m)}>
-                  Promote
-                </button>
-                {isAdmin && (
+                {m.type === 'Moderator' && (
+                  <button className="btn small" onClick={() => handlePromote(m)}>
+                    Promote
+                  </button>
+                )}
+                {isAdmin && m.type === 'Moderator' && (
                   <button className="btn small danger" onClick={() => handleDelete(m)}>
                     Delete
                   </button>
@@ -131,10 +174,10 @@ const ModeratorsTable = () => {
               </td>
             </tr>
           ))}
-          {moderators.length === 0 && (
+          {sortedModerators.length === 0 && (
             <tr>
-              <td colSpan="4" style={{ textAlign: 'center' }}>
-                No moderators found.
+              <td colSpan="5" style={{ textAlign: 'center' }}>
+                No moderators or admins found.
               </td>
             </tr>
           )}

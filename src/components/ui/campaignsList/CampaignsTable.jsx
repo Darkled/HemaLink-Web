@@ -13,7 +13,22 @@ const CampaignsTable = () => {
   const [showForm, setShowForm] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [showDelete, setShowDelete] = useState(false);
-  const [sortMode, setSortMode] = useState("date-desc");
+  const [sortKey, setSortKey] = useState('date');
+  const [sortDir, setSortDir] = useState('desc');
+
+  const toggleSort = (key) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortKey(key);
+      setSortDir('asc');
+    }
+  };
+
+  const sortIndicator = (key) => {
+    if (sortKey !== key) return ' \u2195';
+    return sortDir === 'asc' ? ' \u2191' : ' \u2193';
+  };
 
   const handleAdd = () => {
     setEditing(null);
@@ -50,32 +65,24 @@ const CampaignsTable = () => {
 
   const sorted = useMemo(() => {
     const copy = [...campaigns];
-    switch (sortMode) {
-      case "date-desc":
-        return copy.sort((a, b) => new Date(b.date) - new Date(a.date));
-      case "date-asc":
-        return copy.sort((a, b) => new Date(a.date) - new Date(b.date));
-      case "name-asc":
-        return copy.sort((a, b) => a.entityName.localeCompare(b.entityName));
-      case "name-desc":
-        return copy.sort((a, b) => b.entityName.localeCompare(a.entityName));
-      default:
-        return copy;
-    }
-  }, [campaigns, sortMode]);
+    copy.sort((a, b) => {
+      let cmp = 0;
+      if (sortKey === 'date') {
+        cmp = new Date(a.date) - new Date(b.date);
+      } else {
+        const valA = (a[sortKey] || '').toString().toLowerCase();
+        const valB = (b[sortKey] || '').toString().toLowerCase();
+        cmp = valA.localeCompare(valB);
+      }
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+    return copy;
+  }, [campaigns, sortKey, sortDir]);
 
   return (
     <div className="donors-container">
       <div className="donors-toolbar">
-        <div className="toolbar-left">
-          <label className="sort-label">Sort:</label>
-          <select value={sortMode} onChange={(e) => setSortMode(e.target.value)}>
-            <option value="date-desc">Date (new → old)</option>
-            <option value="date-asc">Date (old → new)</option>
-            <option value="name-asc">Entity A-Z</option>
-            <option value="name-desc">Entity Z-A</option>
-          </select>
-        </div>
+        <div className="toolbar-left" />
         <div className="toolbar-right">
           <button className="btn primary" onClick={handleAdd}>
             + Add Campaign
@@ -85,9 +92,13 @@ const CampaignsTable = () => {
       <table className="donors-table">
         <thead>
           <tr>
-            <th>Entity</th>
+            <th style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => toggleSort('entityName')}>
+              Entity{sortIndicator('entityName')}
+            </th>
             <th>Blood Type</th>
-            <th>Date</th>
+            <th style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => toggleSort('date')}>
+              Date{sortIndicator('date')}
+            </th>
             <th>Location</th>
             <th>Units</th>
             <th>Status</th>

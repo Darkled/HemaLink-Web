@@ -12,7 +12,22 @@ const EntitiesTable = () => {
   const [items, setItems] = useState(initial);
   const [editing, setEditing] = useState(null);
   const [showForm, setShowForm] = useState(false);
-  const [sortMode, setSortMode] = useState('name-asc');
+  const [sortKey, setSortKey] = useState('name');
+  const [sortDir, setSortDir] = useState('asc');
+
+  const toggleSort = (key) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortKey(key);
+      setSortDir('asc');
+    }
+  };
+
+  const sortIndicator = (key) => {
+    if (sortKey !== key) return ' \u2195';
+    return sortDir === 'asc' ? ' \u2191' : ' \u2193';
+  };
 
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [showDelete, setShowDelete] = useState(false);
@@ -42,45 +57,36 @@ const EntitiesTable = () => {
 
   const sorted = useMemo(() => {
     const copy = [...items];
-    switch (sortMode) {
-      case 'name-asc':
-        return copy.sort((a, b) => a.name.localeCompare(b.name));
-      case 'name-desc':
-        return copy.sort((a, b) => b.name.localeCompare(a.name));
-      case 'date-new':
-        return copy.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-      case 'date-old':
-        return copy.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-      default:
-        return copy;
-    }
-  }, [items, sortMode]);
+    copy.sort((a, b) => {
+      let cmp = 0;
+      if (sortKey === 'createdAt') {
+        cmp = new Date(a.createdAt) - new Date(b.createdAt);
+      } else {
+        const valA = (a[sortKey] || '').toString().toLowerCase();
+        const valB = (b[sortKey] || '').toString().toLowerCase();
+        cmp = valA.localeCompare(valB);
+      }
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+    return copy;
+  }, [items, sortKey, sortDir]);
 
   return (
     <div className="donors-container">
-      <div className="donors-toolbar">
-        <div className="toolbar-left">
-          <label className="sort-label">Sort:</label>
-          <select value={sortMode} onChange={(e) => setSortMode(e.target.value)}>
-            <option value="name-asc">Name A-Z</option>
-            <option value="name-desc">Name Z-A</option>
-            <option value="date-new">Date (new → old)</option>
-            <option value="date-old">Date (old → new)</option>
-          </select>
-        </div>
-
-      </div>
-
       <table className="donors-table">
         <thead>
           <tr>
             <th>ID</th>
-            <th>Name</th>
+            <th style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => toggleSort('name')}>
+              Name{sortIndicator('name')}
+            </th>
             <th>Type</th>
             <th>Contact</th>
             <th>Phone</th>
             <th>Address</th>
-            <th>Created</th>
+            <th style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => toggleSort('createdAt')}>
+              Created{sortIndicator('createdAt')}
+            </th>
             <th>Active</th>
             <th>Actions</th>
           </tr>

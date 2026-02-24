@@ -17,6 +17,15 @@ export const getModerators = async () => {
   return json.data;
 };
 
+export const getAdmins = async () => {
+  const res = await fetch(`${API}/api/admin/users?role=2`, {
+    headers: authHeaders(),
+  });
+  if (!res.ok) throw new Error(`Failed to fetch admins (${res.status})`);
+  const json = await res.json();
+  return json.data;
+};
+
 export const createModerator = async ({ name, email, password }) => {
   const res = await fetch(`${API}/api/admin/moderator`, {
     method: "POST",
