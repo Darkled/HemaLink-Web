@@ -17,7 +17,7 @@ import {
   cilList,
 } from "@coreui/icons";
 
-import "./BottomNavBar.css";
+import "./bottomNavBar.css";
 
 const BottomNavBar = () => {
   const { theme, onChangeTheme } = useContext(ThemeContext);
