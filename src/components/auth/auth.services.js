@@ -1,6 +1,8 @@
+const API = import.meta.env.VITE_API_URL;
+
 export const login = (rq, onSuccess, onError) => {
     const { email, password } = rq;
-    fetch(`${import.meta.env.VITE_API_URL}/api/auth/login`, {
+    fetch(`${API}/api/auth/login`, {
         headers: { "Content-Type": "application/json" },
         method: "POST",
         body: JSON.stringify({ email, password }),
@@ -25,7 +27,7 @@ export const login = (rq, onSuccess, onError) => {
 
 export const register = (rq, onSuccess, onError) => {
     const { name, email, password } = rq;
-    fetch(`${import.meta.env.VITE_API_URL}/api/auth/register`, {
+    fetch(`${API}/api/auth/register`, {
         headers: { "Content-Type": "application/json" },
         method: "POST",
         body: JSON.stringify({ name, email, password }),
