@@ -24,3 +24,30 @@ export const getRequesters = async () => {
   const json = await res.json();
   return json.data ?? json;
 };
+
+export const getPendingRequesters = async () => {
+  const res = await fetch(`${API}/api/Moderator/pending-requesters`, {
+    headers: authHeaders(),
+  });
+  if (!res.ok) throw new Error(`Failed to fetch pending entities (${res.status})`);
+  const json = await res.json();
+  return json.data ?? json;
+};
+
+export const acceptRequester = async (id) => {
+  const res = await fetch(`${API}/api/Moderator/accept?id=${id}`, {
+    method: 'PUT',
+    headers: authHeaders(),
+  });
+  if (!res.ok) throw new Error(`Failed to accept entity (${res.status})`);
+  return res;
+};
+
+export const rejectRequester = async (id) => {
+  const res = await fetch(`${API}/api/Moderator/reject?id=${id}`, {
+    method: 'PUT',
+    headers: authHeaders(),
+  });
+  if (!res.ok) throw new Error(`Failed to reject entity (${res.status})`);
+  return res;
+};

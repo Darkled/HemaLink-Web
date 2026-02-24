@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useContext } from 'react';
 import '../donors/donors.css';
 import EntityForm from './EntityForm';
 import DeleteConfirm from '../donors/DeleteConfirm';
-import { getRequesters, formatAdmissionStatus } from './entities.services';
+import { getRequesters, getPendingRequesters, formatAdmissionStatus, acceptRequester, rejectRequester } from './entities.services';
 import AuthContext from '../../../services/authContext/AuthContext';
 import { ROLES } from '../../../services/authContext/auth.utils';
 
@@ -16,16 +16,42 @@ const EntitiesTable = () => {
   const [showForm, setShowForm] = useState(false);
   const [sortKey, setSortKey] = useState('name');
   const [sortDir, setSortDir] = useState('asc');
+  const [filter, setFilter] = useState('all'); // 'all' | 'pending'
+
+  const fetchData = (selectedFilter) => {
+    setLoading(true);
+    const fetcher = selectedFilter === 'pending' ? getPendingRequesters : getRequesters;
+    fetcher()
+      .then((data) => { setItems(data); setError(null); })
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  };
 
   useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    getRequesters()
-      .then((data) => { if (!cancelled) { setItems(data); setError(null); } })
-      .catch((err) => { if (!cancelled) setError(err.message); })
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
-  }, []);
+    fetchData(filter);
+  }, [filter]);
+
+  const handleFilterChange = (e) => {
+    setFilter(e.target.value);
+  };
+
+  const handleAccept = async (id) => {
+    try {
+      await acceptRequester(id);
+      fetchData(filter);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const handleReject = async (id) => {
+    try {
+      await rejectRequester(id);
+      fetchData(filter);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
 
   const toggleSort = (key) => {
     if (sortKey === key) {
@@ -83,6 +109,16 @@ const EntitiesTable = () => {
 
   return (
     <div className="donors-container">
+      <div className="donors-toolbar">
+        <div className="toolbar-left">
+          <label className="sort-label">Filter:</label>
+          <select value={filter} onChange={handleFilterChange}>
+            <option value="all">All Entities</option>
+            <option value="pending">Pending Approval</option>
+          </select>
+        </div>
+      </div>
+
       <table className="donors-table">
         <thead>
           <tr>
@@ -105,6 +141,16 @@ const EntitiesTable = () => {
               <td data-label="Email">{e.email}</td>
               <td data-label="Status">{formatAdmissionStatus(e.admissionStatus)}</td>
               <td>
+                {e.admissionStatus === 0 && (
+                  <>
+                    <button className="btn small primary" onClick={() => handleAccept(e.id)}>
+                      Approve
+                    </button>
+                    <button className="btn small danger" onClick={() => handleReject(e.id)}>
+                      Reject
+                    </button>
+                  </>
+                )}
                 <button className="btn small" onClick={() => handleEdit(e)}>
                   Edit
                 </button>

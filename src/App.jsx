@@ -8,6 +8,7 @@ import Entities from "./components/ui/entities/Entities";
 import Moderators from "./components/ui/moderators/Moderators";
 import NotFound from "./routes/notFound/NotFound";
 import Protected from "./routes/protected/Protected";
+import CancelAppointment from "./components/ui/cancelAppointment/CancelAppointment";
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
               <Route path="/moderators" element={<Moderators />} />
             </Route>
           </Route>
+          <Route path="/cancel/:bloodRequestId/:cancellationToken" element={<CancelAppointment />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

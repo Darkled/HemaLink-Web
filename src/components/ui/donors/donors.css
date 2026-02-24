@@ -257,13 +257,7 @@
 		word-break: break-word;
 	}
 
-	.donors-table td:last-child {
-		border-bottom: none;
-		justify-content: flex-end;
-		gap: 6px;
-		padding-top: 8px;
-		flex-wrap: wrap;
-	}
+
 
 	.donors-table td::before {
 		content: attr(data-label);
@@ -277,9 +271,6 @@
 		flex-shrink: 0;
 	}
 
-	.donors-table td:last-child::before {
-		display: none;
-	}
 
 	.btn.small {
 		padding: 6px 12px;
